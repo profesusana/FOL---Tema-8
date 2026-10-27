@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#183153">
+<title>Reto FOL | Jornada laboral y salario</title>
+<style>
+:root{--navy:#183153;--blue:#285ca8;--light:#eef4fb;--ink:#243248;--muted:#627086;--green:#177245;--greenbg:#e7f6ed;--red:#b42332;--redbg:#fff0f0;--border:#d8e0eb;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(135deg,#e8eff8,#f7f9fc 50%,#e8eff8);color:var(--ink);line-height:1.55}
+button,select{font:inherit}
+button:focus-visible,select:focus-visible{outline:3px solid #f0b429;outline-offset:3px}
+button{cursor:pointer}
+.wrap{width:min(1050px,94%);margin:0 auto;padding:24px 0 42px}
+header{background:var(--navy);color:white;border-radius:22px;padding:30px clamp(20px,5vw,52px);box-shadow:0 12px 32px #18315325;position:relative;overflow:hidden}
+header:after{content:"€";font-size:180px;font-weight:900;position:absolute;right:25px;bottom:-75px;color:#ffffff0d;pointer-events:none}
+.eyebrow{text-transform:uppercase;font-size:.76rem;letter-spacing:.15em;font-weight:800;color:#bcd5f4}
+h1{font-size:clamp(2rem,5vw,3.25rem);line-height:1.08;margin:12px 0}
+header p{max-width:700px;color:#e1eaf6;margin:10px 0}
+.credit{display:inline-block;background:#fff;color:var(--navy);font-weight:800;padding:10px 15px;border-radius:10px;margin-top:14px;position:relative;z-index:1}
+.panel{background:white;border:1px solid var(--border);border-radius:18px;padding:clamp(18px,4vw,32px);margin-top:22px;box-shadow:0 8px 24px #1831530b}
+h2{color:var(--navy);line-height:1.2;margin:0 0 12px}
+h3{color:var(--navy);margin:0 0 10px}
+.muted{color:var(--muted)}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.btn{border:0;border-radius:11px;padding:12px 18px;font-weight:750;transition:transform .12s,filter .12s}
+.btn:hover{filter:brightness(.96);transform:translateY(-1px)}
+.btn-primary{background:var(--blue);color:white}
+.btn-secondary{background:#eaf0f8;color:var(--navy);border:1px solid var(--border)}
+.btn-dark{background:var(--navy);color:white}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:22px 0}
+.field{display:flex;flex-direction:column;gap:7px}
+.field label{font-weight:750;color:var(--navy)}
+select{background:white;border:1px solid #c6d2e1;padding:12px;border-radius:10px;color:var(--ink);width:100%}
+.theme-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px}
+.theme-card{padding:15px;border:1px solid var(--border);border-radius:13px;text-align:left;background:#fbfcfe;color:var(--ink);display:flex;gap:12px;align-items:flex-start;width:100%}
+.theme-card:hover,.theme-card.selected{border-color:var(--blue);background:var(--light)}
+.theme-num{flex:0 0 34px;height:34px;border-radius:10px;background:#dce8f8;color:var(--navy);display:grid;place-items:center;font-weight:850}
+.theme-name{font-weight:800;color:var(--navy);display:block}
+.theme-desc{font-size:.85rem;color:var(--muted);display:block;margin-top:3px}
+.hint{font-size:.91rem;color:var(--muted);margin:15px 0 0}
+.hidden{display:none!important}
+.quiz-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.pill{font-size:.85rem;font-weight:750;border-radius:999px;background:#edf2f8;padding:7px 12px;color:var(--navy)}
+.progressbar{height:9px;border-radius:999px;background:#e9edf4;overflow:hidden;margin:15px 0 22px}
+.progressbar div{height:100%;width:0;background:linear-gradient(90deg,#2e63ae,#55a4db);transition:width .2s}
+.question{font-size:clamp(1.15rem,2.5vw,1.52rem);line-height:1.4;font-weight:800;color:#1b2d48;margin:15px 0 22px}
+.options{display:grid;gap:11px}
+.option{display:flex;gap:13px;align-items:flex-start;text-align:left;background:#fff;border:1.5px solid var(--border);padding:15px;border-radius:12px;color:var(--ink);width:100%;line-height:1.45}
+.option:hover:not(:disabled){border-color:#7597c7;background:#f8fbff}
+.option .letter{flex:0 0 30px;height:30px;border-radius:8px;background:#edf2f8;display:grid;place-items:center;font-weight:850;color:var(--navy)}
+.option.selected{border-color:var(--blue);background:#edf4ff}
+.option.correct{border-color:var(--green);background:var(--greenbg)}
+.option.correct .letter{background:var(--green);color:white}
+.option.wrong{border-color:var(--red);background:var(--redbg)}
+.option.wrong .letter{background:var(--red);color:white}
+.option:disabled{cursor:default;opacity:1}
+.feedback{margin-top:19px;border-radius:12px;padding:16px 18px;border:1px solid}
+.feedback.good{background:var(--greenbg);border-color:#a6d9ba;color:#145b37}
+.feedback.bad{background:var(--redbg);border-color:#f0b5bb;color:#84232c}
+.feedback h3{margin:0 0 6px;color:inherit}
+.feedback p{margin:0}
+.actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;margin-top:22px}
+.actions-right{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0}
+.stat{background:#f4f7fb;border:1px solid var(--border);border-radius:13px;padding:18px;text-align:center}
+.stat strong{font-size:1.9rem;color:var(--navy);display:block;line-height:1.2}
+.stat span{color:var(--muted);font-size:.88rem}
+.result-message{padding:15px;background:#f4f7fb;border-radius:12px}
+.review-item{border:1px solid var(--border);padding:15px;border-radius:12px;margin-top:12px}
+.review-item summary{cursor:pointer;font-weight:750}
+.review-item .answerline{font-size:.94rem;margin-top:8px}
+footer{text-align:center;font-size:.85rem;color:var(--muted);padding:25px 10px 5px}
+@media(max-width:650px){.wrap{width:94%;padding-top:12px}.controls,.theme-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:1/-1}header{border-radius:16px}.actions .btn,.actions-right .btn{flex:1}.actions-right{width:100%;margin:0}.topline{align-items:flex-start}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Formación y Orientación Laboral · Tema 8</div>
+  <h1>Jornada laboral y salario</h1>
+  <p>Entrena tu comprensión con preguntas tipo test, casos prácticos y distractores diseñados para comprobar que dominas los conceptos, sus diferencias y su aplicación.</p>
+  <div class="credit">Elaboración de Susana Felipe Ortiz con ayuda de la IA</div>
+</header>
+
+<main>
+<section id="home" class="panel">
+  <h2>Prepara tu reto</h2>
+  <p class="muted">Elige el epígrafe y el número de preguntas. Las respuestas se corrigen al pulsar «Comprobar» y cada pregunta incluye una explicación.</p>
+  <div class="controls">
+    <div class="field">
+      <label for="count">Número de preguntas</label>
+      <select id="count">
+        <option value="10">10 preguntas</option>
+        <option value="15">15 preguntas</option>
+        <option value="20">20 preguntas</option>
+        <option value="30" selected>30 preguntas</option>
+        <option value="40">40 preguntas</option>
+        <option value="60">60 preguntas</option>
+        <option value="100">100 preguntas</option>
+        <option value="150">150 preguntas</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="order">Orden de las preguntas</label>
+      <select id="order">
+        <option value="random" selected>Orden aleatorio</option>
+        <option value="book">Orden del temario</option>
+      </select>
+    </div>
+  </div>
+  <h3>Selecciona el epígrafe</h3>
+  <div id="themeGrid" class="theme-grid" aria-label="Temas disponibles"></div>
+  <p class="hint">Puedes practicar un epígrafe o seleccionar «Tema completo» para combinar preguntas de todo el capítulo. El cuestionario contiene 150 preguntas.</p>
+  <div style="margin-top:22px;display:flex;gap:12px;flex-wrap:wrap">
+    <button id="start" class="btn btn-primary">Comenzar cuestionario</button>
+    <button id="allTopics" class="btn btn-secondary">Seleccionar tema completo</button>
+  </div>
+</section>
+
+<section id="quiz" class="panel hidden" aria-live="polite">
+  <div class="topline">
+    <div>
+      <div class="eyebrow" style="color:#4774ad">Cuestionario en curso</div>
+      <h2 id="quizTitle">Tema</h2>
+    </div>
+    <button class="btn btn-secondary" id="homeFromQuiz">Volver al inicio</button>
+  </div>
+  <div class="quiz-head">
+    <span id="progressText" class="pill">Pregunta 1 de 30</span>
+    <span id="topicText" class="pill">Epígrafe</span>
+    <span id="scoreText" class="pill">Aciertos: 0</span>
+  </div>
+  <div class="progressbar" role="progressbar" aria-label="Progreso del cuestionario" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressBar"><div id="progressFill"></div></div>
+  <div id="questionText" class="question"></div>
+  <div id="options" class="options"></div>
+  <div id="feedback" class="feedback hidden" role="status" aria-live="polite"></div>
+  <div class="actions">
+    <button id="quit" class="btn btn-secondary">Cambiar de tema</button>
+    <div class="actions-right">
+      <button id="check" class="btn btn-primary" disabled>Comprobar</button>
+      <button id="next" class="btn btn-dark hidden">Siguiente pregunta</button>
+    </div>
+  </div>
+</section>
+
+<section id="results" class="panel hidden" aria-live="polite">
+  <div class="eyebrow" style="color:#4774ad">Cuestionario finalizado</div>
+  <h2 id="resultTitle">¡Reto completado!</h2>
+  <p class="muted" id="resultSubtitle"></p>
+  <div class="stats">
+    <div class="stat"><strong id="rightCount">0</strong><span>Respuestas correctas</span></div>
+    <div class="stat"><strong id="wrongCount">0</strong><span>Respuestas incorrectas</span></div>
+    <div class="stat"><strong id="percentage">0%</strong><span>Porcentaje de aciertos</span></div>
+  </div>
+  <div id="resultMessage" class="result-message"></div>
+  <h3 style="margin-top:24px">Revisión de las preguntas</h3>
+  <p class="muted">Despliega cada pregunta para revisar tu respuesta, la solución y su explicación.</p>
+  <div id="review"></div>
+  <div class="actions" style="margin-top:24px">
+    <button id="restart" class="btn btn-primary">Volver al menú principal</button>
+    <button id="retry" class="btn btn-secondary">Repetir este cuestionario</button>
+  </div>
+</section>
+</main>
+<footer>Cuestionario interactivo de Formación y Orientación Laboral · Jornada laboral y salario</footer>
+</div>
+
+<script>
+"use strict";
+
+const topics = [
+ {id:1,name:"1. La jornada laboral y el horario de trabajo",desc:"Concepto de jornada, tiempo efectivo, horarios, turnos y tipos de jornada."},
+ {id:2,name:"2. Los periodos de descanso",desc:"Descansos entre jornadas, descanso semanal, pausas y vacaciones."},
+ {id:3,name:"3. Permisos retribuidos, fiestas y reducción de jornada",desc:"Permisos, festivos laborales, conciliación y supuestos de reducción."},
+ {id:4,name:"4. El salario",desc:"Estructura salarial, salario mínimo, complementos, nómina y pago."},
+ {id:5,name:"5. Las garantías del salario",desc:"Preferencias de cobro, límites de protección y garantía frente a la insolvencia."}
+];
+
+const bank = [];
+function add(t,q,o,a,e){bank.push({id:bank.length+1,t,q,o,a,e});}
+
+/* EPÍGRAFE 1. LA JORNADA LABORAL Y EL HORARIO DE TRABAJO: 30 PREGUNTAS */
+add(1,"¿Qué describe con mayor precisión la jornada laboral?",["El tiempo efectivo dedicado a realizar la actividad laboral durante un periodo determinado.","El tiempo total que transcurre desde que se sale de casa hasta que se regresa.","El tiempo de presencia en la empresa, incluidas siempre todas las pausas y desplazamientos.","El intervalo comprendido exclusivamente entre la hora de entrada y la hora de salida del centro."],0,"La jornada laboral expresa el tiempo de trabajo que corresponde realizar. No equivale al tiempo de desplazamiento desde el domicilio ni incluye automáticamente cualquier pausa.");
+add(1,"¿Cuál es el límite general de jornada ordinaria semanal que recoge el temario?",["35 horas semanales en cómputo mensual.","40 horas semanales de promedio en cómputo anual.","40 horas semanales exactas todas las semanas del año.","45 horas semanales, siempre que exista un descanso posterior."],1,"El límite general se formula como un promedio de 40 horas semanales en cómputo anual; por ello, la distribución semanal puede variar si se respetan los límites aplicables.");
+add(1,"Una empresa distribuye unas semanas con 42 horas y otras con 38. ¿Qué criterio resulta decisivo para valorar esa distribución?",["Que ninguna semana supere las 40 horas, sin excepciones.","Que el promedio anual no supere el límite y se respeten los descansos y las reglas de distribución.","Que las horas de más se consideren siempre extraordinarias, aunque se compensen en otras semanas.","Que la plantilla acepte verbalmente el horario, aunque no se respeten los límites legales."],1,"La distribución irregular puede permitir semanas de distinta duración, pero debe mantenerse el promedio anual aplicable y respetar los descansos y el procedimiento establecido.");
+add(1,"¿Qué distingue principalmente a la jornada continuada de la jornada partida?",["La continuada concentra el trabajo sin interrupciones o con una pausa inferior a una hora; la partida lo divide en varios tramos.","La continuada solo se utiliza en turnos nocturnos y la partida solo en turnos diurnos.","La continuada tiene una duración semanal inferior y la partida siempre alcanza 40 horas.","La continuada carece de horario fijado y la partida exige trabajar en días festivos."],0,"La diferencia fundamental es la distribución diaria: la jornada partida se divide en tramos separados por una interrupción, mientras que la continuada concentra el trabajo.");
+add(1,"En una jornada partida de 8:00 a 14:00 y de 16:00 a 18:00, ¿cuántas horas de trabajo se realizan?",["Ocho horas, porque la interrupción de dos horas no se suma al trabajo efectivo.","Diez horas, porque debe contarse todo el intervalo entre la entrada y la salida.","Seis horas, porque el segundo tramo se considera tiempo de descanso.","Ocho horas y media, al incluirse automáticamente la pausa para comer."],0,"Hay seis horas en el primer tramo y dos en el segundo. La interrupción entre ambos no se computa como trabajo efectivo salvo que corresponda otra consideración según las condiciones aplicables.");
+add(1,"¿Qué caracteriza a una jornada a tiempo parcial?",["Que el trabajo se presta únicamente por la mañana.","Que la jornada pactada es inferior a la de una persona trabajadora a tiempo completo comparable.","Que las horas se concentran en fines de semana y festivos.","Que no existe un horario establecido por contrato."],1,"La parcialidad se determina por la duración pactada respecto de la jornada completa comparable, no por el turno horario ni por los días concretos de trabajo.");
+add(1,"¿Cuál es la finalidad principal del registro diario de jornada?",["Calcular únicamente las vacaciones pendientes.","Dejar constancia de la hora de inicio y finalización diaria de la jornada.","Sustituir el contrato de trabajo cuando existen horarios variables.","Registrar solo las horas extraordinarias y omitir las ordinarias."],1,"El registro diario permite documentar el inicio y la finalización de la jornada y comprobar el cumplimiento de los límites de tiempo de trabajo.");
+add(1,"¿Cuál de estas afirmaciones sobre el registro horario es la más adecuada?",["Solo debe existir si la plantilla trabaja por turnos.","Puede omitirse cuando el salario se paga mensualmente.","Debe llevarse de modo que permita acreditar la jornada realizada y conservarse durante el plazo previsto legalmente.","Solo se anotan las horas que excedan de la jornada ordinaria."],2,"El registro no se limita a turnos ni a horas extraordinarias. Debe permitir comprobar el tiempo trabajado y estar disponible conforme a las obligaciones de conservación y acceso.");
+add(1,"¿Qué caracteriza a la distribución irregular de la jornada?",["La empresa puede alterar cualquier horario sin límites ni preaviso.","Las horas varían entre semanas o periodos, dentro de los límites y condiciones aplicables.","Todas las semanas tienen necesariamente el mismo número de horas.","Solo puede aplicarse a quienes trabajan a tiempo parcial."],1,"La irregularidad se refiere a cómo se distribuye el tiempo a lo largo del periodo de cómputo, no a la ausencia total de límites.");
+add(1,"Si el convenio establece una distribución de jornada más favorable que el mínimo legal, ¿qué debe hacerse?",["Aplicar siempre el máximo legal, aunque el convenio sea más beneficioso.","Aplicar necesariamente el horario más largo para toda la plantilla.","Respetar las condiciones válidas del convenio, sin superar los límites legales.","Ignorar el convenio si el contrato individual no lo reproduce literalmente."],2,"La jornada establecida por convenio o contrato puede ser más favorable y reducir la duración máxima, pero no puede ampliar los límites legales.");
+add(1,"En el marco general del Estatuto de los Trabajadores, ¿cuál es el límite ordinario diario de referencia para una persona adulta?",["Diez horas efectivas sin necesidad de acuerdo adicional.","Nueve horas ordinarias, salvo que otra distribución se establezca respetando los descansos.","Ocho horas exactas en todos los sectores y circunstancias.","Doce horas siempre que exista una pausa para comer."],1,"La referencia general es un máximo de nueve horas ordinarias diarias, salvo que por convenio o acuerdo se establezca otra distribución, respetando los descansos.");
+add(1,"¿Qué particularidad se aplica a las personas trabajadoras menores de 18 años respecto al tiempo diario?",["Pueden realizar hasta nueve horas ordinarias si reciben formación.","La jornada puede ampliarse si el contrato es a tiempo parcial.","No pueden superar ocho horas diarias de trabajo efectivo, incluida, cuando proceda, la formación y el trabajo para varios empleadores.","Solo deben respetar el límite semanal y carecen de límite diario."],2,"Para menores de edad se establecen límites específicos más estrictos, incluido el máximo diario de ocho horas en los términos previstos legalmente.");
+add(1,"Una persona trabaja cinco días a ocho horas cada día. ¿Cuál es su jornada semanal?",["40 horas.","35 horas.","42 horas.","45 horas."],0,"Cinco días por ocho horas equivalen a 40 horas semanales. El cálculo debe hacerse con el tiempo de trabajo, no con las pausas no computables.");
+add(1,"¿Qué debe distinguirse al analizar el horario de trabajo y la jornada?",["La jornada expresa cuándo se trabaja y el horario expresa exclusivamente cuánto se trabaja.","La jornada y el horario son conceptos idénticos y siempre intercambiables.","La jornada expresa la duración del trabajo; el horario concreta la distribución temporal de entrada, salida y tramos.","El horario solo es relevante cuando existen horas extraordinarias."],2,"La jornada se refiere a la duración del trabajo y el horario concreta cómo se distribuye a lo largo del día o de la semana.");
+add(1,"¿Qué se entiende por trabajo a turnos?",["Una distribución en la que distintos trabajadores ocupan sucesivamente los mismos puestos conforme a un ritmo determinado.","Una modalidad que exige alternar obligatoriamente cada día entre mañana, tarde y noche.","Una jornada en la que se trabaja exclusivamente los sábados y domingos.","Un sistema de horas extraordinarias pactado para los periodos de mayor actividad."],0,"El trabajo a turnos implica que diferentes personas ocupan sucesivamente los mismos puestos, de acuerdo con un ritmo y una organización predeterminados.");
+add(1,"¿Qué objetivo organizativo explica con mayor claridad el trabajo a turnos?",["Permitir que un mismo trabajador acumule siempre todas las horas del día.","Cubrir de forma sucesiva necesidades de actividad que se prolongan más allá de la jornada individual.","Suprimir los descansos semanales mediante relevos entre trabajadores.","Convertir todas las horas nocturnas en horas extraordinarias."],1,"La sucesión de equipos permite mantener la actividad durante periodos amplios sin exigir que una sola persona trabaje durante todo ese tiempo.");
+add(1,"¿Qué periodo se considera trabajo nocturno en el marco general del Estatuto de los Trabajadores?",["De las 20:00 a las 04:00.","De las 23:00 a las 07:00.","De las 22:00 a las 06:00.","De las 00:00 a las 08:00."],2,"El periodo nocturno general se extiende de las 22:00 a las 06:00 horas.");
+add(1,"¿Qué rasgo permite identificar, en términos generales, a una persona trabajadora nocturna?",["Que realiza al menos una hora de trabajo en cualquier horario posterior a las 18:00.","Que realiza normalmente una parte suficiente de su jornada anual en periodo nocturno o al menos tres horas de su jornada diaria en ese periodo.","Que termina su jornada después de las 20:00 una vez al mes.","Que trabaja siempre en un turno fijo, aunque sea diurno."],1,"La definición utiliza criterios de habitualidad: al menos tres horas diarias en periodo nocturno o una parte de su jornada anual establecida por la normativa.");
+add(1,"¿Qué límite específico se aplica a la jornada de las personas trabajadoras nocturnas?",["Un promedio máximo de ocho horas diarias en el periodo de referencia legal.","Un máximo absoluto de cuatro horas por noche en cualquier actividad.","El mismo límite que las horas extraordinarias, sin un régimen específico.","Un máximo de nueve horas nocturnas, siempre que se compensen después."],0,"El trabajo nocturno tiene una protección específica: en el periodo de referencia aplicable, la jornada no debe superar ocho horas diarias de promedio, sin perjuicio de las reglas y excepciones legales.");
+add(1,"¿Cuál de estas afirmaciones sobre horas extraordinarias es correcta?",["Son todas las horas que se realizan después de las 18:00.","Son las que exceden la duración máxima de la jornada ordinaria aplicable.","Son cualquier hora realizada en un día festivo, aunque esté dentro del horario ordinario.","Son las horas realizadas por una persona con contrato a tiempo parcial, con independencia de su jornada."],1,"Las horas extraordinarias son las que se realizan sobre la duración máxima de la jornada ordinaria de trabajo aplicable.");
+add(1,"¿Cuál es el límite anual general de horas extraordinarias que se utiliza como referencia?",["60 horas, incluidas siempre las compensadas con descanso.","100 horas para cualquier persona trabajadora.","80 horas, con las exclusiones legalmente previstas para determinadas compensaciones.","No existe límite anual si se paga cada hora por separado."],2,"El límite general es de 80 horas extraordinarias al año, aunque determinadas horas compensadas con descanso en el plazo legal no computan a estos efectos.");
+add(1,"¿Cuál es una forma válida de compensar las horas extraordinarias?",["Solo abonarlas al mismo valor que cualquier complemento salarial.","Compensarlas mediante descanso retribuido o abonarlas según lo establecido legalmente, sin que el valor de la hora sea inferior al de la ordinaria.","Convertirlas automáticamente en vacaciones no retribuidas.","Restarlas de la jornada ordinaria del mismo día sin registrarlas."],1,"Las horas extraordinarias pueden abonarse o compensarse por descanso retribuido, de acuerdo con la ley y el convenio, respetando los mínimos aplicables.");
+add(1,"¿Qué efecto puede producirse si las horas extraordinarias se compensan por descanso dentro del plazo legal?",["Dejan de considerarse tiempo de trabajo a todos los efectos.","Se transforman en permisos sin sueldo.","Pueden no computar para el límite anual general de horas extraordinarias.","Se convierten en horas ordinarias de la semana en la que se disfruta el descanso."],2,"La compensación con descanso dentro del plazo previsto permite excluir esas horas del cómputo del límite anual general.");
+add(1,"¿Qué afirmación describe mejor la voluntariedad de las horas extraordinarias?",["Siempre son obligatorias cuando la empresa las solicita.","Con carácter general son voluntarias, salvo que exista una obligación válida derivada de convenio o contrato, o un supuesto legal excepcional.","Solo son voluntarias cuando se realizan durante el día.","Nunca pueden acordarse de forma previa en contrato o convenio."],1,"La regla general es la voluntariedad, pero puede haber compromisos válidos de realización y excepciones contempladas en la normativa.");
+add(1,"¿Qué particularidad existe respecto de las horas extraordinarias de los menores de 18 años?",["Pueden realizarlas durante el curso escolar si duran menos de una hora.","Pueden realizarlas cuando estén autorizadas por sus representantes legales.","Están prohibidas para las personas menores de 18 años.","Solo se prohíben cuando se efectúan en horario nocturno."],2,"La normativa laboral prohíbe la realización de horas extraordinarias por menores de 18 años.");
+add(1,"¿Qué función cumple el calendario laboral en la organización de la jornada?",["Sustituye el contrato y determina por sí solo el salario.","Debe mostrar exclusivamente los días de vacaciones de cada trabajador.","Permite organizar y dar a conocer la distribución anual de jornadas, días de trabajo, descansos y festivos aplicables.","Solo sirve para registrar las ausencias justificadas."],2,"El calendario laboral ayuda a conocer la distribución anual del tiempo de trabajo y los días laborables, festivos y de descanso.");
+add(1,"¿Qué caracteriza a la jornada intensiva?",["La actividad se concentra en un tramo continuo, reduciendo o eliminando la interrupción prolongada entre tramos.","La plantilla trabaja dos tramos separados obligatoriamente por dos horas.","El trabajo se realiza únicamente durante la noche.","La jornada semanal se reduce necesariamente a la mitad."],0,"La jornada intensiva concentra el trabajo en un tramo más continuo, normalmente sin una pausa larga que divida la jornada.");
+add(1,"Una empresa necesita actividad durante las 24 horas. ¿Qué organización corresponde mejor al concepto de turnos?",["Una persona cubre siempre las 24 horas con pausas dentro de su turno.","Varias personas o equipos se suceden en los puestos para cubrir los distintos periodos de actividad.","Se elimina el descanso diario porque los equipos se relevan.","Todas las personas trabajan simultáneamente en un único tramo."],1,"Los turnos permiten que varios trabajadores o equipos se releven para cubrir la actividad necesaria a lo largo del día.");
+add(1,"¿Cuál es el criterio más correcto al interpretar una cláusula contractual sobre jornada?",["Puede ampliar cualquier límite legal si la persona firma voluntariamente.","Prevalece siempre sobre el convenio colectivo, incluso si es menos favorable.","Debe interpretarse dentro del marco legal y convencional aplicable, sin validar condiciones contrarias a normas imperativas.","Solo produce efectos si fija el mismo horario para toda la plantilla."],2,"El contrato individual no puede convalidar condiciones contrarias a los límites legales imperativos y debe respetar las normas y el convenio aplicable.");
+add(1,"¿Qué diferencia esencial existe entre tiempo de presencia y tiempo de trabajo efectivo?",["El tiempo de presencia siempre se paga como hora extraordinaria.","El trabajo efectivo comprende el tiempo dedicado a la actividad; la presencia puede incluir disponibilidad sin que todo ese tiempo se equipare automáticamente a trabajo efectivo.","El tiempo de trabajo efectivo comienza siempre al fichar, aunque se permanezca sin trabajar.","El tiempo de presencia se utiliza exclusivamente para calcular vacaciones."],1,"Hay que distinguir la prestación efectiva de trabajo de otros periodos de presencia o disponibilidad, cuyo tratamiento depende de la regulación aplicable.");
+add(1,"Si el horario de una persona incluye de 9:00 a 17:00 y una pausa no computable de una hora, ¿cuánto trabajo efectivo realiza?",["Ocho horas.","Siete horas.","Seis horas.","Nueve horas."],1,"Entre las 9:00 y las 17:00 transcurren ocho horas. Si una pausa de una hora no se computa como trabajo efectivo, quedan siete horas de trabajo.");
+
+/* EPÍGRAFE 2. LOS PERIODOS DE DESCANSO: 30 PREGUNTAS */
+add(2,"¿Cuál es la finalidad principal de los descansos laborales?",["Aumentar el cómputo anual de horas sin modificar el contrato.","Proteger la recuperación física y mental de la persona trabajadora.","Sustituir la retribución de las horas ordinarias.","Permitir que la empresa elimine la jornada máxima en periodos de actividad intensa."],1,"Los descansos protegen la salud, facilitan la recuperación y limitan la continuidad del trabajo.");
+add(2,"¿Cuál es el descanso mínimo general entre el final de una jornada y el comienzo de la siguiente?",["Ocho horas.","Diez horas.","Doce horas.","Catorce horas."],2,"El descanso mínimo general entre jornadas es de doce horas.");
+add(2,"Una persona termina de trabajar a las 22:30. Si se aplica el descanso general de doce horas, ¿cuál sería la hora más temprana de entrada al día siguiente?",["A las 8:30.","A las 9:30.","A las 10:30.","A las 7:30."],2,"El descanso mínimo entre jornadas es de doce horas. Desde las 22:30 hasta las 10:30 del día siguiente transcurren exactamente doce horas.");
+add(2,"¿Qué pausa mínima general corresponde a una jornada continuada que excede de seis horas?",["Quince minutos, sin que sea siempre tiempo de trabajo efectivo.","Treinta minutos de manera automática para todas las personas adultas.","Diez minutos que siempre se consideran tiempo de trabajo efectivo.","Una hora completa obligatoriamente dentro de la jornada."],0,"La pausa mínima general de referencia es de quince minutos cuando la jornada continuada excede de seis horas. Su cómputo como trabajo efectivo depende de lo previsto en convenio o contrato.");
+add(2,"¿Cuándo se considera, con carácter general, tiempo de trabajo efectivo la pausa de descanso durante una jornada continuada?",["Siempre, por mandato legal, cualquiera que sea el convenio.","Nunca, aunque el convenio lo establezca expresamente.","Cuando así esté establecido por convenio colectivo o contrato de trabajo.","Solo cuando la pausa dure menos de cinco minutos."],2,"La pausa no se computa automáticamente como trabajo efectivo; puede tener ese tratamiento cuando lo establezcan el convenio o el contrato.");
+add(2,"¿Qué descanso corresponde con carácter general a los menores de 18 años cuando la jornada continuada supera cuatro horas y media?",["Quince minutos como mínimo.","Treinta minutos como mínimo.","Una hora y media como mínimo.","No existe una pausa específica para menores."],1,"Los menores de 18 años cuentan con una protección reforzada: una pausa mínima de treinta minutos cuando la jornada continuada excede de cuatro horas y media.");
+add(2,"¿Cuál es el descanso semanal mínimo general de una persona trabajadora adulta?",["Un día completo, sin posibilidad de acumulación.","Día y medio ininterrumpido, con las posibilidades de acumulación previstas legalmente.","Dos días completos en cualquier sector y situación.","Veinticuatro horas que se pueden dividir libremente en minutos."],1,"La referencia general para adultos es un día y medio ininterrumpido de descanso semanal, con las reglas legales sobre distribución y acumulación.");
+add(2,"¿Qué protección específica existe para el descanso semanal de las personas menores de 18 años?",["Deben disfrutar de un mínimo de dos días ininterrumpidos de descanso semanal.","Tienen el mismo mínimo que los adultos en todos los supuestos.","Solo descansan dos días si han realizado horas extraordinarias.","Pueden sustituir el descanso semanal por una compensación económica."],0,"Los menores de edad tienen un mínimo de dos días ininterrumpidos de descanso semanal.");
+add(2,"¿Qué significa que el descanso semanal sea ininterrumpido?",["Que solo puede disfrutarse después de una semana de vacaciones.","Que debe existir un periodo continuo de descanso y no solo sumar horas aisladas de varios días.","Que la persona no puede disfrutar nunca de dos días consecutivos libres.","Que el descanso debe coincidir siempre con el domingo y el lunes."],1,"Ininterrumpido significa que el periodo debe disfrutarse de forma continua, sin fraccionarlo en pausas dispersas que no alcancen el descanso exigido.");
+add(2,"¿Cuál de estas afirmaciones sobre las vacaciones anuales es correcta?",["Se sustituyen libremente por dinero todos los años.","Su duración depende únicamente de los días que la empresa decida conceder.","Constituyen un descanso anual retribuido y, en general, no pueden sustituirse por compensación económica salvo las excepciones legales.","Solo corresponden a personas trabajadoras con contrato indefinido."],2,"Las vacaciones anuales son retribuidas y, con carácter general, no se sustituyen por dinero durante la vigencia normal de la relación laboral.");
+add(2,"¿Qué duración mínima general de vacaciones anuales recoge el Estatuto de los Trabajadores?",["Veinte días naturales.","Treinta días naturales.","Veintidós días laborables en todos los convenios.","Quince días hábiles."],1,"El mínimo legal general es de treinta días naturales, aunque el convenio puede mejorar esa duración y la forma de cómputo debe ajustarse al régimen aplicable.");
+add(2,"Si una persona comienza a trabajar a mitad de año, ¿qué criterio resulta adecuado para calcular sus vacaciones?",["Pierde el derecho a vacaciones durante ese año.","Le corresponden automáticamente treinta días naturales completos.","Se determina la parte proporcional que corresponda al tiempo de prestación, conforme al régimen aplicable.","Solo puede disfrutarlas si la empresa las concede voluntariamente."],2,"El derecho se genera a lo largo de la relación laboral; cuando no se trabaja todo el año, generalmente se calcula la parte proporcional.");
+add(2,"¿Quién fija el periodo de disfrute de las vacaciones?",["Exclusivamente la persona trabajadora, sin coordinación con la empresa.","Exclusivamente la empresa, sin tener que respetar ninguna regla.","La empresa de acuerdo con la persona trabajadora, conforme a lo establecido en convenio y a la normativa aplicable.","La Inspección de Trabajo en todos los casos."],2,"Las fechas se fijan conforme al convenio y al acuerdo entre empresa y persona trabajadora; la empresa debe seguir las reglas sobre comunicación y calendario.");
+add(2,"¿Con cuánta antelación debe conocer la persona trabajadora, con carácter general, las fechas de sus vacaciones?",["Al menos dos meses antes del comienzo del disfrute.","El mismo día en que empiezan.","Solo después de haber terminado las vacaciones.","No hay obligación de comunicar las fechas."],0,"La persona trabajadora debe conocer las fechas que le corresponden al menos con dos meses de antelación, conforme a la regla general.");
+add(2,"Si las vacaciones coinciden con una incapacidad temporal relacionada con embarazo, parto o lactancia natural, ¿qué principio se aplica?",["Las vacaciones se pierden automáticamente al finalizar el año.","Pueden disfrutarse en una fecha distinta, incluso fuera del año natural correspondiente, conforme a la regulación aplicable.","Se convierten obligatoriamente en una paga extraordinaria.","Solo se trasladan si la incapacidad dura menos de siete días."],1,"En los supuestos protegidos por la norma, la coincidencia con la incapacidad no elimina el derecho a disfrutar las vacaciones en otro momento.");
+add(2,"¿Qué sucede cuando las vacaciones coinciden con una incapacidad temporal por contingencias distintas a las especialmente protegidas?",["Nunca pueden disfrutarse en otro momento.","Se transforman en descanso semanal ordinario.","Pueden disfrutarse posteriormente si la incapacidad impide su disfrute, dentro de los límites temporales legales.","Se descuentan del salario del mes en que se produce la incapacidad."],2,"La normativa permite recuperar vacaciones que coinciden con una incapacidad temporal, con reglas específicas sobre el periodo máximo para disfrutarlas después del año de generación.");
+add(2,"¿Qué afirmación distingue correctamente el descanso semanal de las vacaciones?",["Ambos derechos son intercambiables y se suman en un único saldo.","El descanso semanal es periódico; las vacaciones son un descanso anual retribuido.","Las vacaciones solo existen cuando no hay descanso semanal.","El descanso semanal siempre se paga como complemento salarial."],1,"Son derechos diferentes: uno se disfruta periódicamente y el otro constituye un periodo anual de descanso retribuido.");
+add(2,"Una pausa de comida separa dos tramos de jornada. ¿Qué dato determina si se cuenta como tiempo trabajado?",["Que la pausa figure en el calendario con una hora de inicio.","Que el centro tenga comedor para la plantilla.","Que así lo establezca el convenio o el contrato, según el régimen aplicable.","Que la persona permanezca cerca del puesto, aunque esté libre de obligaciones."],2,"La duración y el tratamiento de las pausas dependen de la regulación aplicable; no toda pausa se computa automáticamente como trabajo efectivo.");
+add(2,"¿Cuál es la relación correcta entre descanso y horas extraordinarias?",["Las horas extraordinarias eliminan el derecho a descanso diario.","Los descansos mínimos siguen siendo exigibles aunque se realicen horas extraordinarias.","El descanso semanal solo es necesario para quien no hace horas extraordinarias.","Los descansos pueden sustituirse siempre por el pago de horas extra."],1,"Las horas extraordinarias no suprimen las obligaciones relativas a los descansos mínimos ni a la protección de la salud.");
+add(2,"¿Por qué no es equivalente disfrutar de dos pausas de seis horas separadas que de un descanso diario continuo de doce horas?",["Porque el descanso diario se mide únicamente por el número de pausas.","Porque el tiempo de descanso exigido debe respetar la continuidad establecida para ese derecho.","Porque solo se permiten pausas cuando se trabaja de noche.","Porque el descanso diario se calcula sumando vacaciones y festivos."],1,"El descanso entre jornadas debe respetar la continuidad prevista legalmente; acumular periodos discontinuos no satisface automáticamente esa exigencia.");
+add(2,"¿Qué principio se aplica al programar vacaciones y descansos?",["La organización empresarial puede prescindir de ellos durante los periodos de máxima actividad.","Deben planificarse respetando los mínimos legales, el convenio y las necesidades de organización compatibles con esos derechos.","Solo se reconocen cuando la persona no ha cometido faltas de asistencia.","Pueden sustituirse por salario si la empresa tiene dificultades de personal."],1,"La organización puede requerir planificación, pero no elimina el derecho a los descansos establecidos legalmente.");
+add(2,"¿Cómo debe interpretarse la expresión «descanso mínimo»?",["Es una cifra orientativa que la empresa puede reducir libremente.","Es el nivel inferior de protección que debe respetarse, salvo regímenes legales específicos aplicables.","Es la duración máxima permitida para cualquier pausa.","Solo tiene relevancia en los contratos temporales."],1,"Un mínimo establece una garantía básica, no una duración máxima ni una recomendación opcional.");
+add(2,"¿Qué diferencia existe entre una pausa dentro de la jornada y el descanso entre jornadas?",["La pausa separa tramos de un mismo día de trabajo; el descanso entre jornadas separa dos jornadas laborales.","Ambas expresiones describen exclusivamente las vacaciones anuales.","El descanso entre jornadas solo se aplica a menores.","La pausa diaria siempre debe durar más que el descanso entre jornadas."],0,"Son descansos distintos: la pausa se produce durante la jornada, mientras que el descanso diario transcurre entre dos jornadas.");
+add(2,"¿Puede una empresa fijar unilateralmente vacaciones que vulneren el mínimo legal?",["Sí, si lo compensa con una paga extraordinaria.","Sí, si la actividad empresarial es estacional.","No; la organización del calendario debe respetar el mínimo legal y las reglas aplicables.","Sí, cuando la persona trabajadora tiene contrato a tiempo parcial."],2,"La planificación de vacaciones está limitada por la normativa y no permite rebajar unilateralmente el derecho mínimo.");
+add(2,"¿Qué aspecto debe comprobarse antes de concluir que una jornada de trabajo ha respetado el descanso diario?",["Solo la hora a la que la persona fichó al entrar.","La hora real de finalización de la jornada anterior y la hora de comienzo de la siguiente.","Únicamente el número de días trabajados en el mes.","El importe de los complementos salariales incluidos en la nómina."],1,"El descanso se calcula desde la finalización de una jornada hasta el inicio de la siguiente.");
+add(2,"¿Qué opción refleja mejor el carácter retribuido de las vacaciones?",["Durante las vacaciones la persona deja de percibir toda retribución ordinaria.","Las vacaciones se consideran una sanción remunerada.","El descanso vacacional debe conservar la retribución que corresponda conforme a la normativa y la interpretación aplicable.","La empresa puede descontar del salario los días naturales de vacaciones."],2,"Las vacaciones son un derecho de descanso retribuido; su cálculo debe ajustarse a las reglas legales y convencionales aplicables.");
+add(2,"Una empresa comunica las fechas de vacaciones con una semana de antelación. ¿Qué problema se plantea?",["Ninguno, porque el plazo no está regulado.","Puede incumplir la antelación mínima general de dos meses.","Las vacaciones se convierten en horas extraordinarias.","El derecho a vacaciones pasa automáticamente a la empresa."],1,"La regla general exige conocer las fechas con al menos dos meses de antelación.");
+add(2,"¿Qué caracteriza al descanso semanal frente a una compensación económica?",["Puede sustituirse siempre por dinero si hay acuerdo escrito.","Es una medida de protección del tiempo de recuperación y no se sustituye libremente por una suma salarial.","Solo se disfruta cuando existe un convenio colectivo.","Se genera únicamente después de cada jornada nocturna."],1,"El descanso semanal tiene finalidad protectora y su sustitución por dinero no es una alternativa libre con carácter general.");
+add(2,"¿Cuál es la consecuencia más adecuada de una planificación que respeta la jornada máxima, pero reduce por debajo del mínimo el descanso entre jornadas?",["Es correcta porque únicamente importa el total de horas semanales.","Es correcta si se abonan complementos por disponibilidad.","Puede ser irregular, ya que también debe respetarse el descanso entre jornadas.","Es válida solo en contratos temporales."],2,"Cumplir el límite de horas no basta: deben respetarse también los descansos mínimos independientes.");
+
+/* EPÍGRAFE 3. PERMISOS RETRIBUIDOS, FESTIVOS Y REDUCCIÓN DE JORNADA: 30 PREGUNTAS */
+add(3,"¿Qué diferencia esencial existe entre un permiso retribuido y una ausencia sin sueldo?",["En el permiso retribuido se conserva la remuneración en los términos legales; en la ausencia sin sueldo no se percibe la retribución correspondiente al tiempo no trabajado.","El permiso retribuido solo puede pedirse por motivos de ocio.","La ausencia sin sueldo siempre constituye una sanción disciplinaria.","Ambos supuestos tienen necesariamente idéntico efecto salarial."],0,"El permiso retribuido permite ausentarse por una causa reconocida conservando el derecho a remuneración en los términos aplicables.");
+add(3,"¿Qué suele exigirse para disfrutar de un permiso retribuido por una causa concreta?",["Que la persona elija la fecha sin comunicar la causa.","Que la ausencia se relacione con el supuesto reconocido y se justifique cuando proceda.","Que la empresa lo convierta en vacaciones anuales.","Que se disfrute siempre en días no laborables."],1,"El permiso está ligado a una causa determinada y puede requerir aviso y justificación conforme a la normativa y al convenio.");
+add(3,"¿Qué finalidad tienen los permisos retribuidos?",["Aumentar la jornada anual sin modificar el salario.","Facilitar que la persona atienda determinadas circunstancias personales, familiares o públicas sin perder la retribución reconocida.","Sustituir permanentemente las vacaciones anuales.","Permitir ausencias indefinidas por cualquier motivo personal."],1,"Los permisos retribuidos protegen la posibilidad de atender circunstancias expresamente previstas sin pérdida de remuneración, dentro de sus condiciones.");
+add(3,"¿Qué derecho se relaciona tradicionalmente con el matrimonio en la regulación general de permisos laborales?",["Quince días naturales de permiso, conforme al régimen aplicable.","Dos días laborables en todos los supuestos.","Un mes de vacaciones adicional de disfrute obligatorio en verano.","Una reducción permanente de jornada sin necesidad de justificarla."],0,"El permiso por matrimonio se recoge tradicionalmente como quince días naturales, sin perjuicio de comprobar la regulación vigente y las mejoras del convenio.");
+add(3,"¿Cuál es el enfoque correcto al estudiar permisos por accidente, enfermedad grave, hospitalización o intervención de familiares?",["Todos los supuestos generan siempre el mismo número de días, con independencia de la norma aplicable.","Su duración y requisitos dependen del supuesto, del parentesco o relación protegida y de la regulación vigente.","Solo se conceden si el familiar vive en el mismo domicilio.","Siempre se consideran vacaciones anuales y se descuentan de ellas."],1,"Estos permisos tienen requisitos y duraciones que dependen de la causa, las personas protegidas y la regulación aplicable; deben comprobarse sin generalizar.");
+add(3,"¿Qué suele ser relevante para determinar el permiso por fallecimiento de un familiar?",["El salario base de la persona fallecida.","La relación de parentesco o vínculo protegido y, en los supuestos previstos, la necesidad de desplazamiento.","El número de horas extraordinarias realizadas en el mes.","La antigüedad de la empresa, con independencia de la relación familiar."],1,"La duración del permiso por fallecimiento depende de las condiciones que establece la norma, entre ellas la relación protegida y, en su caso, el desplazamiento.");
+add(3,"¿Qué caracteriza al permiso por traslado del domicilio habitual?",["Es una autorización para cambiar de centro de trabajo sin modificar el contrato.","Se reconoce como permiso por la causa de mudanza, conforme a las condiciones legales o convencionales aplicables.","Se concede únicamente cuando el cambio de domicilio lo ordena la empresa.","Siempre equivale a quince días naturales."],1,"La mudanza del domicilio habitual es una causa tradicional de permiso, cuya duración concreta debe comprobarse en el régimen aplicable.");
+add(3,"¿Qué objetivo tiene el permiso para cumplir un deber inexcusable de carácter público y personal?",["Permitir ausentarse por cualquier actividad privada que resulte conveniente.","Facilitar el cumplimiento de una obligación pública personal cuando no sea posible cumplirla fuera del horario laboral, en los términos establecidos.","Sustituir el descanso semanal cuando hay exceso de trabajo.","Conceder automáticamente una excedencia voluntaria."],1,"El permiso se vincula a un deber público y personal que debe atenderse durante el tiempo de trabajo y bajo las condiciones legales.");
+add(3,"¿Cuál es el tratamiento general de las horas necesarias para realizar funciones sindicales o de representación?",["Siempre se descuentan del salario, aunque exista crédito horario reconocido.","Se rigen por las garantías y el crédito horario que reconozca la normativa aplicable.","Se convierten en horas extraordinarias por el hecho de no producir actividad ordinaria.","Solo se permiten si la empresa carece de convenio colectivo."],1,"Las funciones representativas cuentan con garantías y, cuando proceda, crédito horario conforme a la normativa y al convenio.");
+add(3,"¿Qué afirmación describe mejor el permiso para exámenes prenatales y preparación al parto?",["Se concede únicamente si se realiza fuera de la jornada.","Puede dar derecho a ausentarse por el tiempo indispensable cuando deban realizarse durante la jornada, conforme a la norma aplicable.","Se concede siempre como vacaciones adicionales de treinta días.","Solo corresponde al otro progenitor."],1,"La regulación contempla el tiempo indispensable para determinadas actuaciones relacionadas con el embarazo cuando deben realizarse dentro de la jornada.");
+add(3,"¿Qué criterio debe seguirse al aplicar un permiso reconocido por ley y ampliado por convenio?",["Aplicar siempre la duración legal mínima aunque el convenio mejore el derecho.","Aplicar la regulación válida más favorable que corresponda, dentro del marco normativo.","Elegir cada vez entre permiso y vacaciones sin reglas.","Aplicar únicamente la práctica habitual de la empresa."],1,"Los convenios pueden mejorar los permisos, siempre dentro del marco legal. Debe comprobarse el derecho que resulte aplicable.");
+add(3,"¿Qué distingue un permiso retribuido de una reducción de jornada?",["El permiso permite ausentarse por una causa concreta; la reducción modifica el tiempo de trabajo durante el periodo en que se aplica.","La reducción nunca tiene efectos salariales y el permiso siempre reduce el salario.","Ambos conceptos son idénticos y cambian únicamente de nombre.","El permiso exige necesariamente trabajar más horas la semana siguiente."],0,"El permiso responde a una circunstancia específica; la reducción disminuye el tiempo de trabajo de acuerdo con el supuesto y con sus efectos retributivos.");
+add(3,"¿Qué objetivo persiguen las medidas de reducción de jornada por motivos familiares?",["Sustituir el contrato por una prestación de desempleo en todos los casos.","Facilitar la conciliación mediante una disminución del tiempo de trabajo en supuestos protegidos.","Permitir reducir la jornada sin causa ni límite en cualquier contrato.","Aumentar automáticamente la jornada de otros trabajadores."],1,"Las reducciones previstas legalmente facilitan la conciliación y se vinculan a causas y requisitos concretos.");
+add(3,"¿Qué consecuencia salarial puede asociarse a determinadas reducciones de jornada por guarda legal?",["El salario puede disminuir proporcionalmente al tiempo de trabajo reducido, según el régimen aplicable.","El salario siempre aumenta en la misma proporción que disminuyen las horas.","La persona conserva necesariamente todas las retribuciones, cualquiera que sea la causa.","La reducción solo afecta al salario base y nunca a otros conceptos."],0,"La reducción de jornada suele llevar aparejada una reducción proporcional de salario, sin perjuicio de protecciones y reglas especiales previstas legalmente.");
+add(3,"¿Qué es un festivo laboral?",["Un día que únicamente puede disfrutarse como vacaciones individuales.","Un día reconocido como festivo conforme al calendario laboral, con el tratamiento previsto legalmente.","Un día de descanso que siempre se recupera trabajando más horas la semana siguiente.","Una jornada reducida que la empresa decide de forma informal."],1,"Los festivos laborales se establecen mediante el calendario correspondiente y tienen el tratamiento legal de descanso retribuido y no recuperable, salvo reglas específicas aplicables.");
+add(3,"¿Cuál es el número general de fiestas laborales retribuidas y no recuperables previsto en la normativa española?",["Doce, incluidas necesariamente todas las fiestas locales.","Catorce al año, con dos de carácter local dentro del régimen general.","Quince, todas determinadas exclusivamente por el ayuntamiento.","Diez, sin posibilidad de ampliación por festividades autonómicas."],1,"El régimen general contempla catorce fiestas laborales al año, con dos locales, de acuerdo con las reglas de distribución estatal, autonómica y local.");
+add(3,"¿Qué organismo tiene relevancia para el establecimiento de fiestas locales?",["La representación sindical estatal en exclusiva.","La administración municipal correspondiente, dentro del procedimiento previsto.","La empresa individual sin atender al calendario oficial.","El servicio de prevención de riesgos laborales."],1,"Las fiestas locales se determinan dentro del marco de la normativa y de los calendarios oficiales, con intervención de la administración local.");
+add(3,"¿Cuál es el tratamiento general de un festivo laboral?",["Se disfruta como descanso retribuido y no recuperable, conforme al calendario y la normativa aplicable.","Se descuenta siempre del salario mensual.","Se convierte automáticamente en una hora extraordinaria por cada hora de ausencia.","Se recupera obligatoriamente el siguiente domingo."],0,"El festivo laboral reconocido tiene carácter retribuido y no recuperable en el régimen general.");
+add(3,"Si una persona presta servicios en un festivo porque la actividad lo exige, ¿qué debe comprobarse?",["Que todo trabajo en festivo carece de regulación.","El régimen específico de descanso compensatorio o retribución que resulte aplicable.","Que el festivo se elimina del calendario del centro automáticamente.","Que las horas se anotan como vacaciones."],1,"El trabajo en festivo puede estar sujeto a reglas específicas de descanso compensatorio y remuneración, según la normativa y el convenio aplicables.");
+add(3,"¿Cómo se distinguen las fiestas nacionales, autonómicas y locales?",["Por el ámbito territorial en el que se establecen y aplican.","Por el salario base de las personas que las disfrutan.","Por la antigüedad de quienes trabajan en la empresa.","Por la modalidad del contrato, sin relación con el territorio."],0,"La diferencia responde al ámbito territorial y a la autoridad competente dentro de las reglas de elaboración de los calendarios laborales.");
+add(3,"¿Cuál es el requisito esencial para determinar si procede un permiso retribuido?",["Que exista cualquier inconveniente personal durante el horario.","Que la causa esté incluida en una norma o condición aplicable y se cumplan sus requisitos.","Que el trabajador lleve exactamente un año en la empresa.","Que haya suficientes personas sustitutas en todos los casos."],1,"El permiso retribuido no se concede para cualquier ausencia: debe existir una causa reconocida y deben cumplirse los requisitos correspondientes.");
+add(3,"Una persona solicita permiso para una gestión personal sin causa prevista entre los permisos retribuidos. ¿Qué conclusión es más prudente?",["La empresa debe concederlo y pagarlo automáticamente.","La gestión se convierte en festivo laboral.","No puede suponerse que exista derecho a permiso retribuido; habrá que revisar convenio, acuerdo o posibles alternativas.","La ausencia queda siempre cubierta por el permiso por deber público."],2,"No toda gestión personal da derecho a permiso retribuido. Es necesario consultar el marco legal y convencional y, en su caso, otras formas de autorización.");
+add(3,"¿Qué describe mejor la finalidad de las reducciones de jornada por cuidados?",["La pérdida definitiva del puesto de trabajo.","La adaptación de las obligaciones laborales a responsabilidades de cuidado reconocidas, con las condiciones previstas legalmente.","La sustitución de la jornada pactada por disponibilidad ilimitada.","La eliminación de los descansos mínimos durante el cuidado."],1,"Estas medidas buscan hacer compatible el trabajo con responsabilidades de cuidado y están reguladas mediante requisitos específicos.");
+add(3,"¿Cuál de estas afirmaciones sobre un permiso por causa familiar es incorrecta?",["Puede estar condicionado al parentesco o vínculo previsto en la norma.","Puede requerir acreditar la circunstancia que origina la ausencia.","Su duración debe consultarse en la regulación vigente y el convenio.","Su duración es siempre idéntica para cualquier familiar y cualquier circunstancia."],3,"Las condiciones varían según el supuesto y el vínculo protegido; no es correcto atribuir una duración idéntica a todos los permisos.");
+add(3,"¿Qué diferencia existe entre un permiso y un festivo laboral?",["El permiso se vincula a una causa individual reconocida; el festivo figura en el calendario laboral como día festivo general aplicable.","El festivo solo se aplica a una persona cuando tiene una cita médica.","El permiso siempre se disfruta en domingo y el festivo nunca coincide con él.","Ambos tienen la misma causa y el mismo procedimiento."],0,"El permiso responde a una circunstancia particular; el festivo depende del calendario laboral aplicable al territorio o a la actividad.");
+add(3,"Una persona reduce su jornada en un porcentaje determinado. ¿Qué dato permite calcular la nueva duración?",["La duración semanal anterior y el porcentaje de reducción aplicado.","El número de días festivos del año, exclusivamente.","La cuantía de las pagas extraordinarias, sin conocer la jornada anterior.","El número de empleados de la empresa, exclusivamente."],0,"Para calcular la nueva jornada se parte de la duración inicial y se aplica el porcentaje de reducción.");
+add(3,"Si una reducción implica trabajar el 75 % de la jornada original de 40 horas, ¿cuál será la nueva jornada semanal?",["10 horas.","25 horas.","30 horas.","35 horas."],2,"El 75 % de 40 horas es 30 horas: 40 × 0,75 = 30.");
+add(3,"¿Qué debe hacerse al resolver un supuesto práctico sobre permisos retribuidos?",["Elegir la duración que parezca más razonable sin comprobar la norma.","Identificar la causa, el vínculo protegido, la duración legal o convencional y los requisitos de justificación.","Sumar todos los permisos posibles, aunque respondan a una misma causa.","Aplicar siempre el plazo más largo que se encuentre en cualquier convenio."],1,"La solución exige identificar todos los elementos del supuesto y aplicar la norma o el convenio pertinente, sin combinar reglas incompatibles.");
+
+/* EPÍGRAFE 4. EL SALARIO: 30 PREGUNTAS */
+add(4,"¿Qué es el salario en sentido laboral?",["Cualquier ingreso que recibe una persona, incluidos los regalos de familiares.","La totalidad de las percepciones económicas que recibe por la prestación profesional de servicios por cuenta ajena, en dinero o especie, en los términos legales.","Únicamente el salario base que figura en la primera línea de la nómina.","La cantidad que la empresa decide pagar al margen del contrato y del convenio."],1,"El salario comprende las percepciones económicas derivadas del trabajo por cuenta ajena, con las exclusiones legales correspondientes.");
+add(4,"¿Qué distingue principalmente el salario base de los complementos salariales?",["El salario base retribuye la prestación laboral según el sistema de clasificación; los complementos se añaden por circunstancias vinculadas al trabajo, la persona o la situación de la empresa.","El salario base se paga una vez al año y los complementos solo cada semana.","El salario base es siempre variable y los complementos siempre fijos.","Los complementos salariales no forman nunca parte de la remuneración."],0,"El salario base es el componente salarial de referencia; los complementos se añaden por circunstancias establecidas legal o convencionalmente.");
+add(4,"¿Qué puede determinar el salario base de una categoría profesional?",["La voluntad unilateral diaria de la persona trabajadora.","La clasificación profesional y lo establecido en convenio o contrato dentro del marco normativo.","El número de festivos locales del municipio, exclusivamente.","El valor de los bienes personales de la persona empleada."],1,"La clasificación profesional y la regulación convencional o contractual aplicable sirven para determinar el salario base.");
+add(4,"¿Qué finalidad cumple una nómina?",["Registrar las vacaciones futuras, sin informar de las retribuciones.","Documentar las percepciones salariales y no salariales, las deducciones y el importe líquido que se abona.","Sustituir el contrato laboral y el convenio colectivo.","Informar exclusivamente de las cotizaciones empresariales."],1,"La nómina desglosa las percepciones y deducciones y permite identificar el importe bruto y el líquido que recibe la persona trabajadora.");
+add(4,"¿Qué diferencia existe entre salario bruto y salario neto o líquido?",["El bruto es el importe antes de las deducciones; el neto es lo que queda después de aplicarlas.","El bruto incluye solo complementos y el neto solo salario base.","El neto siempre es superior al bruto porque incorpora retenciones.","No hay diferencia: ambas expresiones indican el mismo importe."],0,"El salario bruto se calcula antes de las deducciones; el líquido es la cantidad que efectivamente se percibe después de retenciones y cotizaciones.");
+add(4,"¿Cuál de los siguientes conceptos es una deducción habitual en la nómina?",["Un complemento por nocturnidad.","La parte de cotización a la Seguridad Social a cargo de la persona trabajadora.","El salario base mensual.","Un complemento salarial de puesto."],1,"La cotización a la Seguridad Social a cargo de la persona trabajadora se descuenta de las percepciones brutas, junto con las demás deducciones que correspondan.");
+add(4,"¿Cuál es la función de la retención a cuenta del IRPF en una nómina?",["Es un descuento voluntario destinado a financiar el convenio colectivo.","Es un anticipo del impuesto sobre la renta que se ingresa conforme a las reglas tributarias.","Es una multa empresarial por ausencias.","Es una aportación que aumenta el salario neto."],1,"La retención es un pago a cuenta del IRPF que reduce la cantidad líquida abonada en nómina.");
+add(4,"¿Qué diferencia general existe entre percepción salarial y percepción extrasalarial?",["La salarial remunera el trabajo; la extrasalarial compensa gastos o responde a conceptos no salariales reconocidos, según su naturaleza legal.","La extrasalarial siempre se paga en especie y la salarial siempre en dinero.","La salarial se excluye de la nómina y la extrasalarial se incluye siempre.","Ambas tienen por definición la misma naturaleza y el mismo tratamiento."],0,"La naturaleza depende del concepto: el salario remunera el trabajo, mientras que las percepciones extrasalariales pueden compensar gastos o responder a otras causas excluidas del salario.");
+add(4,"¿Cuál de estos conceptos puede ser una percepción extrasalarial cuando cumple los requisitos legales?",["El salario base por la categoría profesional.","Un complemento por productividad personal.","El reintegro de gastos justificados derivados de la actividad laboral.","El complemento por trabajo nocturno."],2,"El reembolso de gastos laborales puede tener naturaleza extrasalarial cuando cumple los requisitos exigidos; no debe confundirse con una retribución del trabajo.");
+add(4,"¿Cuál es una característica del salario en especie?",["La retribución se satisface mediante bienes, derechos o servicios distintos del dinero, dentro de los límites legales.","Se abona exclusivamente mediante una transferencia a la cuenta bancaria.","Solo existe cuando la persona recibe una propina de clientes.","No se incluye nunca en el cómputo del salario."],0,"El salario en especie consiste en retribuciones no dinerarias, cuya valoración y límites deben respetar la normativa aplicable.");
+add(4,"¿Qué límite general se aplica al salario en especie?",["Puede representar la totalidad del salario si lo firma el trabajador.","No puede superar el porcentaje máximo establecido legalmente ni reducir la cuantía íntegra en dinero por debajo del mínimo legal.","No tiene límite porcentual si la empresa proporciona alojamiento.","Solo está permitido para contratos temporales."],1,"El salario en especie está limitado por la ley y no puede desplazar indebidamente la percepción dineraria mínima legal.");
+add(4,"¿Qué expresa el salario mínimo interprofesional (SMI)?",["La cantidad mínima que fija cada empresa para toda su plantilla sin atender a la ley.","El mínimo de retribución que debe respetarse legalmente para las personas trabajadoras en los términos previstos, sin perjuicio de los complementos computables según la norma.","El salario máximo que se puede pagar en una categoría profesional.","La cantidad que reciben solo quienes trabajan en la Administración pública."],1,"El SMI establece un suelo legal de remuneración y se fija oficialmente; debe comprobarse la cuantía vigente y su aplicación al caso.");
+add(4,"¿Quién fija el SMI en España?",["Cada convenio colectivo de empresa de manera independiente.","La persona trabajadora y la empresa al firmar el contrato.","El Gobierno, previa consulta a las organizaciones sindicales y empresariales más representativas.","La administración municipal en función del coste de la vivienda."],2,"La fijación del SMI corresponde al Gobierno, tras consultar a las organizaciones sindicales y empresariales más representativas, de acuerdo con la ley.");
+add(4,"¿Qué debe comprobarse antes de comparar una retribución anual con el SMI?",["Solo el importe de una mensualidad aislada.","El periodo de referencia, la jornada, las pagas extraordinarias y los conceptos computables conforme a la normativa aplicable.","El número de compañeros que cobran más.","Únicamente el salario líquido, después del IRPF."],1,"La comparación exige utilizar el periodo y la jornada correctos y determinar qué conceptos se computan según las reglas legales.");
+add(4,"¿Qué es un complemento salarial de antigüedad?",["Una cantidad que puede vincularse a los años de servicio cuando así se reconoce en la regulación aplicable.","Una indemnización que se abona únicamente al extinguirse el contrato.","Una dieta destinada a cubrir el coste de comidas durante un viaje.","Una deducción por haber trabajado muchos años en la empresa."],0,"La antigüedad puede dar lugar a un complemento si lo establece el convenio o la regulación aplicable.");
+add(4,"¿Qué caracteriza a un complemento por puesto de trabajo?",["Se abona por el tiempo que la persona lleva contratada, aunque cambie de puesto.","Se relaciona con condiciones específicas del puesto, como determinados riesgos, penosidad, turnicidad o nocturnidad, según la regulación aplicable.","Compensa exclusivamente los gastos de desplazamiento desde casa.","Se abona necesariamente a todas las personas de la empresa por igual."],1,"Los complementos de puesto remuneran circunstancias propias del trabajo realizado y su percepción depende de las condiciones y reglas aplicables.");
+add(4,"¿Qué finalidad tiene un complemento por nocturnidad?",["Compensar una circunstancia vinculada a la prestación de servicios en periodo nocturno, conforme al convenio o a la norma aplicable.","Compensar el uso de transporte público durante el día.","Sustituir el descanso semanal obligatorio.","Recompensar exclusivamente la antigüedad."],0,"La nocturnidad se asocia al trabajo realizado en el periodo nocturno, con el alcance y las condiciones que establezca la regulación aplicable.");
+add(4,"¿Qué caracteriza a un complemento ligado a la productividad?",["Se calcula siempre en función de los años de servicio.","Puede vincular la remuneración a resultados, rendimiento u objetivos en las condiciones previamente establecidas.","Es una indemnización por traslado del domicilio habitual.","Solo puede abonarse mediante alojamiento y manutención."],1,"Un complemento de productividad puede depender del rendimiento u objetivos según los criterios establecidos y aplicables.");
+add(4,"¿Qué característica presenta un complemento de vencimiento superior al mes?",["Se devenga y paga siempre en cada jornada diaria.","Se abona con una periodicidad superior al mes, como puede suceder con las pagas extraordinarias.","No tiene naturaleza salarial por superar un mes.","Solo se puede percibir cuando termina la relación laboral."],1,"Las pagas extraordinarias son un ejemplo de retribuciones de vencimiento superior al mes.");
+add(4,"¿Cuántas pagas extraordinarias mínimas contempla con carácter general el Estatuto de los Trabajadores?",["Una, abonada necesariamente en diciembre.","Dos al año, una de ellas con ocasión de las fiestas de Navidad y otra en el mes fijado por convenio o acuerdo válido.","Cuatro, una por cada trimestre natural.","Tres, aunque el convenio puede reducirlas a una."],1,"La referencia general es de dos gratificaciones extraordinarias al año, con las condiciones temporales y de prorrateo que permite la regulación aplicable.");
+add(4,"¿Qué significa prorratear las pagas extraordinarias?",["Eliminar su derecho y sustituirlo por un complemento voluntario.","Repartir su importe entre las mensualidades ordinarias, cuando el régimen aplicable lo permite.","Abonarlas todas el último día de diciembre.","Retenerlas hasta que finalice el contrato, con independencia de la ley."],1,"El prorrateo distribuye el importe de las pagas extraordinarias entre las mensualidades ordinarias cuando está permitido conforme al convenio y la normativa.");
+add(4,"¿Qué documento permite comprobar el desglose del salario, las deducciones y el importe líquido?",["El calendario laboral.","El cuadrante de turnos.","El recibo individual justificativo del pago del salario o nómina.","El parte de vacaciones exclusivamente."],2,"La nómina es el recibo justificativo del pago y desglosa las percepciones y deducciones correspondientes.");
+add(4,"¿Cuál es la diferencia entre devengo y deducción en la nómina?",["El devengo es una cantidad que corresponde percibir; la deducción se resta para calcular el importe líquido.","El devengo se resta del salario y la deducción lo aumenta.","Ambos términos describen exclusivamente el salario neto.","El devengo solo se aplica a las pagas extra y la deducción solo a las horas extraordinarias."],0,"Los devengos son las percepciones generadas durante el periodo; las deducciones reducen el bruto para obtener el líquido.");
+add(4,"Una nómina recoge 1.500 € de percepciones totales y 230 € de deducciones. ¿Cuál es el líquido?",["1.730 €.","1.500 €.","1.270 €.","1.230 €."],2,"El líquido es el bruto menos las deducciones: 1.500 − 230 = 1.270 €.");
+add(4,"¿Qué principio debe respetar la periodicidad del pago salarial?",["El salario puede abonarse en cualquier momento del año si la empresa informa verbalmente.","El pago debe realizarse puntualmente y con la periodicidad pactada o legalmente aplicable, sin que el periodo ordinario exceda del límite previsto.","La empresa solo está obligada a pagar cuando obtiene beneficios.","El salario puede retrasarse de forma indefinida si se acumulan horas extraordinarias."],1,"El salario debe abonarse puntual y documentalmente; la periodicidad regular no puede incumplir los límites legales.");
+add(4,"¿Qué derecho tiene la persona trabajadora cuando el salario se retrasa o no se paga?",["Debe aceptar el retraso sin posibilidad de reclamar.","Puede reclamar las cantidades debidas y, si concurren los requisitos legales, las consecuencias previstas por mora salarial.","Solo puede reclamar si la empresa está en concurso.","Pierde la posibilidad de reclamar al finalizar el mes."],1,"El impago o retraso permite reclamar las cantidades debidas y puede generar el interés por mora u otras consecuencias legales aplicables.");
+add(4,"¿Qué caracteriza al interés por mora salarial previsto con carácter general en el Estatuto de los Trabajadores?",["Es un recargo fijo del 2 % mensual para toda deuda.","Se aplica únicamente a las dietas.","La regla general contempla un interés del 10 % de lo adeudado, en los supuestos de mora salarial previstos.","Se aplica automáticamente sobre todos los salarios futuros."],2,"La referencia del artículo 29 del Estatuto de los Trabajadores es un interés por mora del 10 % de lo adeudado, en los términos legalmente aplicables.");
+add(4,"¿Qué distingue una dieta de un complemento salarial por rendimiento?",["La dieta puede compensar gastos ocasionados por desplazamientos de trabajo; el complemento por rendimiento retribuye resultados o desempeño conforme a su regulación.","Ambos remuneran siempre exactamente la misma circunstancia.","La dieta se abona solo a quien trabaja de noche.","El complemento por rendimiento se excluye siempre de la nómina."],0,"La dieta puede tener naturaleza extrasalarial si compensa gastos de trabajo; el complemento de rendimiento remunera el desempeño según el sistema aplicable.");
+add(4,"¿Cuál es la finalidad de clasificar las percepciones en salariales y extrasalariales?",["Elegir cuáles pueden ocultarse en el recibo de nómina.","Distinguir la remuneración del trabajo de los conceptos de compensación o indemnización que tengan otra naturaleza legal.","Eliminar el deber de documentar los pagos.","Permitir que todos los conceptos se traten fiscalmente de forma idéntica."],1,"La clasificación determina la naturaleza de cada concepto y puede afectar a su tratamiento laboral, de cotización y tributario.");
+add(4,"¿Qué afirmación sobre el salario bruto y las cotizaciones de la empresa es correcta?",["La cotización empresarial es siempre una deducción del salario bruto de la persona trabajadora.","El bruto y el líquido son idénticos cuando se cotiza a la Seguridad Social.","Las cotizaciones a cargo de la empresa no deben confundirse con las deducciones que se restan del bruto de la persona trabajadora.","El IRPF es una cotización empresarial que no aparece en la nómina."],2,"Las cotizaciones empresariales son obligaciones de la empresa y no se restan del salario bruto de la persona trabajadora como si fueran deducciones propias.");
+add(4,"¿Qué debe comprobarse para saber si un complemento salarial se mantiene al dejar de darse la circunstancia que lo origina?",["Que todos los complementos son consolidables por definición.","La naturaleza del complemento y las reglas de consolidación o devengo establecidas en la norma o el convenio.","Que la persona trabajadora lo haya recibido una vez.","Únicamente la fecha en que se emitió la primera nómina."],1,"No todos los complementos se consolidan: su permanencia depende de la naturaleza y de las reglas que regulan cada uno.");
+add(4,"¿Qué tratamiento puede tener una retribución en especie en la nómina?",["No se puede reflejar porque no se entrega dinero.","Puede aparecer valorada como concepto retributivo, con el tratamiento y los límites legalmente aplicables.","Solo se refleja si la persona renuncia al salario base.","Siempre se descuenta íntegramente del salario mínimo sin comprobación adicional."],1,"Las percepciones en especie también deben reflejarse y valorarse conforme a las reglas laborales y tributarias aplicables.");
+add(4,"Si el contrato ofrece un salario inferior al mínimo legal aplicable, ¿qué criterio debe prevalecer?",["La cifra contractual por haber sido firmada voluntariamente.","El salario mínimo legal aplicable, con los ajustes que procedan según jornada y reglas de cómputo.","El salario de la persona con menor antigüedad del centro.","La cuantía que acuerde verbalmente el responsable de departamento."],1,"El contrato no puede rebajar el mínimo legal aplicable; la comparación debe hacerse con la jornada y los conceptos computables correctos.");
+add(4,"¿Qué objetivo tiene el desglose de conceptos en la nómina?",["Dificultar que se conozca el salario bruto.","Permitir identificar el origen de las percepciones y las deducciones que determinan el líquido.","Sustituir la explicación de los conceptos salariales en el convenio.","Registrar exclusivamente los importes variables."],1,"El desglose facilita la comprobación de los importes, su naturaleza y el cálculo de la cantidad líquida percibida.");
+
+/* EPÍGRAFE 5. LAS GARANTÍAS DEL SALARIO: 30 PREGUNTAS */
+add(5,"¿Cuál es el objetivo general de las garantías salariales?",["Permitir a la empresa aplazar el pago sin consecuencias.","Proteger el cobro de las cantidades salariales frente a determinados riesgos e impagos.","Garantizar que toda persona cobre exactamente el mismo sueldo.","Sustituir el contrato de trabajo por un sistema de ayudas públicas."],1,"Las garantías salariales protegen el crédito retributivo de la persona trabajadora, especialmente ante impagos o concurrencia de acreedores.");
+add(5,"¿Qué regula, de forma general, el artículo 32 del Estatuto de los Trabajadores?",["El procedimiento de elección de representantes de personal.","La preferencia y protección del crédito salarial frente a otros créditos, dentro de los supuestos y límites legales.","La duración máxima de la jornada ordinaria.","El cálculo de las vacaciones anuales."],1,"El artículo 32 contiene reglas de protección y preferencia del crédito salarial y delimita los supuestos y cuantías a los que alcanza esa preferencia.");
+add(5,"¿Qué se entiende por crédito salarial?",["La deuda que la persona trabajadora contrae con la empresa para recibir formación.","La cantidad que el empleador debe a la persona trabajadora por salarios devengados y pendientes de pago.","La cotización empresarial que se paga a la Seguridad Social.","El anticipo que concede un banco para comprar una vivienda."],1,"El crédito salarial es el derecho de cobro derivado de salarios que la empresa debe y todavía no ha abonado.");
+add(5,"¿Por qué son necesarias las reglas de preferencia del salario?",["Porque el salario nunca puede ser reclamado judicialmente.","Porque, cuando existen varios acreedores, debe determinarse qué deudas tienen prioridad de cobro conforme a la ley.","Porque los créditos salariales siempre se sitúan detrás de los préstamos bancarios.","Porque eliminan todas las deudas del empleador."],1,"Las reglas de preferencia ordenan el cobro cuando concurren distintos créditos sobre los bienes o recursos del empleador.");
+add(5,"¿Qué principio es correcto al interpretar los privilegios salariales?",["Todos los salarios pendientes tienen prioridad ilimitada sobre cualquier crédito.","La preferencia se aplica según los supuestos, límites y condiciones establecidos legalmente.","La preferencia depende exclusivamente de la fecha en que se firma el contrato.","Las garantías solo se aplican cuando el empleador es una empresa pública."],1,"La protección salarial no es ilimitada: hay que identificar el tipo de crédito, el periodo, los bienes afectados y los límites legales.");
+add(5,"¿Qué importancia tiene distinguir los salarios recientes de otras deudas salariales?",["La antigüedad del salario pendiente puede ser relevante para determinar el régimen de preferencia que se aplica.","Todos los salarios tienen siempre idéntico orden de cobro, sin atender al periodo.","Los salarios recientes dejan de ser reclamables después de un mes.","La antigüedad solo afecta a los complementos, no a los créditos salariales."],0,"El régimen de preferencia puede diferenciar entre salarios por determinados periodos y otros créditos salariales; es necesario comprobar los supuestos legales concretos.");
+add(5,"¿Qué función desempeña el Fondo de Garantía Salarial (FOGASA)?",["Pagar todas las nóminas sin límite cuando una empresa tiene pérdidas.","Abonar, dentro de los límites y condiciones legales, determinados salarios e indemnizaciones pendientes en supuestos de insolvencia o concurso empresarial.","Fijar anualmente el salario mínimo interprofesional.","Resolver todos los conflictos sobre vacaciones y horarios."],1,"FOGASA es un organismo de garantía que responde en los supuestos y con los límites legales de ciertas deudas salariales e indemnizatorias.");
+add(5,"¿Cuándo puede intervenir FOGASA en relación con los salarios?",["Siempre que la persona trabajadora desee cambiar de empleo.","Cuando se producen los supuestos legales de insolvencia o concurso y se cumplen los requisitos para la cobertura.","Cada vez que se abona una nómina mensual ordinaria.","Cuando el trabajador no está de acuerdo con la distribución horaria."],1,"La intervención requiere que concurra el supuesto legal de cobertura y se cumplan las condiciones de reconocimiento y reclamación.");
+add(5,"¿Qué afirmación sobre la cobertura de FOGASA es correcta?",["Cubre sin límite todas las cantidades reclamadas por la persona trabajadora.","Solo puede cubrir las vacaciones, nunca salarios.","La cobertura está sujeta a topes, conceptos cubiertos y requisitos legales, por lo que no equivale a una garantía ilimitada.","Sustituye a la empresa en todas sus obligaciones laborales futuras."],2,"FOGASA no responde de cualquier deuda ni por cualquier importe: se aplican límites y requisitos legales específicos.");
+add(5,"¿Qué es un límite de cobertura en una garantía salarial?",["La cantidad máxima o regla cuantitativa que condiciona el importe que puede asumir el organismo garante.","El número mínimo de empleados necesario para que exista una nómina.","El plazo diario de descanso que debe disfrutar un trabajador.","La duración del periodo de prueba pactado en el contrato."],0,"Los límites de cobertura restringen la cantidad o el alcance de la prestación garantizada según la normativa aplicable.");
+add(5,"¿Qué documento o actuación puede ser importante al reclamar salarios impagados?",["Conservar únicamente mensajes informales sin identificar las cantidades.","Disponer de documentación que permita acreditar la relación laboral, los salarios devengados y las cantidades pendientes.","Esperar indefinidamente a que la empresa reconozca la deuda.","Eliminar las nóminas anteriores para evitar contradicciones."],1,"La documentación de la relación laboral, las nóminas, el registro de jornada y las reclamaciones puede ayudar a probar la deuda salarial.");
+add(5,"¿Por qué conviene identificar con precisión el periodo de salarios impagados?",["Porque el periodo pendiente puede afectar al cálculo, a los plazos de reclamación y a la aplicación de determinadas garantías.","Porque solo se pueden reclamar salarios de diciembre.","Porque las cantidades pendientes se convierten automáticamente en indemnizaciones.","Porque el periodo no tiene efecto sobre la cuantía reclamada."],0,"La identificación temporal permite calcular la deuda, comprobar la prescripción y determinar el régimen de garantía o preferencia aplicable.");
+add(5,"¿Qué significa que una garantía salarial esté sujeta a requisitos legales?",["Que se concede automáticamente en cualquier conflicto laboral.","Que la persona debe cumplir las condiciones que fija la norma para que opere la protección.","Que el empleador puede decidir libremente si aplica la ley.","Que no existe un procedimiento para solicitarla."],1,"Las garantías requieren cumplir condiciones, acreditar hechos y seguir el procedimiento correspondiente.");
+add(5,"¿Cuál es la relación entre la reclamación de salario y la insolvencia de la empresa?",["Solo se pueden reclamar salarios cuando la empresa es solvente.","La insolvencia puede activar mecanismos adicionales de protección, pero la deuda y sus requisitos deben acreditarse.","La insolvencia elimina cualquier derecho salarial pendiente.","La declaración de insolvencia convierte todos los salarios en pagos voluntarios."],1,"La insolvencia puede activar garantías específicas, como la intervención de FOGASA, sin eliminar la necesidad de reconocer y justificar los créditos.");
+add(5,"¿Qué error debe evitarse al estudiar la preferencia de los créditos salariales?",["Examinar qué clase de crédito se reclama.","Comprobar los bienes afectados y los límites previstos.","Suponer que todo crédito salarial prevalece sin excepción sobre cualquier otra deuda.","Distinguir la preferencia salarial de la actuación de FOGASA."],2,"La preferencia salarial tiene reglas y límites determinados; no debe presentarse como una prioridad absoluta e ilimitada.");
+add(5,"¿Qué distingue la preferencia de cobro de la garantía de FOGASA?",["La preferencia ordena el cobro frente a otros créditos; FOGASA puede asumir ciertas deudas cubiertas en los supuestos previstos.","Son el mismo mecanismo y operan siempre de forma idéntica.","FOGASA decide el salario mínimo y la preferencia fija las vacaciones.","La preferencia únicamente se aplica a los festivos y FOGASA a los descansos semanales."],0,"La preferencia determina el rango de determinados créditos; FOGASA es un mecanismo institucional que abona ciertas deudas cuando concurren los requisitos legales.");
+add(5,"¿Qué debe hacer una persona cuando detecta que no le han abonado el salario debido?",["Renunciar automáticamente a la cantidad al finalizar el mes.","Documentar las cantidades, fechas y conceptos pendientes y valorar la reclamación por las vías legalmente previstas.","Compensarlo reduciendo unilateralmente su jornada sin comunicarlo.","Esperar a que transcurra el plazo de reclamación antes de actuar."],1,"Documentar la deuda y actuar dentro de los plazos permite proteger el derecho de cobro; conviene revisar las vías de reclamación aplicables.");
+add(5,"¿Qué principio se aplica a los salarios pendientes cuando hay un procedimiento concursal?",["Se pagan siempre al final y sin atender a ninguna clasificación.","Se aplican las reglas de preferencia y de cobertura que correspondan conforme a la legislación laboral y concursal.","Se convierten automáticamente en vacaciones pendientes.","Quedan extinguidos por el mero hecho de declararse el concurso."],1,"La declaración concursal no elimina sin más las deudas salariales; su tratamiento depende de las reglas concursales y de las garantías laborales aplicables.");
+add(5,"¿Qué describe mejor la insolvencia empresarial a efectos de las garantías salariales?",["Una reducción de beneficios en un trimestre, aunque se abonen todas las nóminas.","Una situación en la que se cumplen los requisitos legales que permiten considerar que no pueden atenderse determinadas obligaciones.","Cualquier desacuerdo entre la plantilla y el departamento de recursos humanos.","La existencia de un contrato temporal en la empresa."],1,"La insolvencia con relevancia jurídica debe apreciarse conforme a los requisitos legales, no por una simple caída de beneficios o por un desacuerdo.");
+add(5,"¿Cuál es la importancia de distinguir salarios e indemnizaciones en una reclamación?",["Ambos conceptos son siempre idénticos y tienen los mismos topes.","La naturaleza de la deuda puede cambiar los requisitos y límites de la garantía o prestación aplicable.","Las indemnizaciones nunca pueden reclamarse.","El salario solo se puede reclamar cuando existe indemnización."],1,"Salarios e indemnizaciones son conceptos diferentes y pueden estar sujetos a reglas, topes y requisitos de garantía distintos.");
+add(5,"¿Qué significa que FOGASA actúe dentro de determinados límites máximos?",["Que abona exactamente la cuantía reclamada, sea cual sea.","Que el importe abonado puede ser inferior a la deuda total si la cobertura legal no alcanza la totalidad.","Que únicamente paga cantidades inferiores a un euro.","Que no necesita comprobar el salario ni el periodo adeudado."],1,"La prestación de FOGASA se calcula según los límites legales y puede no cubrir toda la deuda pendiente.");
+add(5,"¿Qué finalidad tiene establecer un máximo de salarios cubiertos por una garantía?",["Asegurar que todas las deudas empresariales tengan un importe idéntico.","Delimitar la responsabilidad del mecanismo de garantía y evitar una cobertura ilimitada.","Permitir que cada empresa modifique el límite sin norma alguna.","Impedir que la persona trabajadora cobre directamente de la empresa."],1,"Los topes delimitan el alcance económico del sistema de garantía y deben aplicarse conforme a la regulación vigente.");
+add(5,"Al estudiar una pregunta práctica sobre FOGASA, ¿qué información conviene identificar primero?",["El color del uniforme de la plantilla.","La antigüedad del edificio de la empresa.","El tipo de deuda, el supuesto de insolvencia o concurso y los límites y requisitos vigentes.","El horario de apertura del centro de trabajo, con independencia de la reclamación."],2,"La respuesta depende del tipo de cantidad adeudada, del supuesto legal de cobertura y de los límites y requisitos aplicables.");
+add(5,"¿Qué relación existe entre las garantías salariales y el derecho a recibir la nómina?",["Las garantías eliminan la obligación del empleador de documentar los pagos.","Las garantías refuerzan la protección del crédito, pero no sustituyen la obligación ordinaria de pagar y documentar el salario.","Las garantías solo se aplican a trabajadores autónomos.","La garantía salarial permite omitir las deducciones obligatorias."],1,"El empleador sigue obligado a pagar y documentar el salario; las garantías se activan para proteger el crédito en situaciones específicas.");
+add(5,"Una empresa debe tres mensualidades a una persona trabajadora. ¿Qué conclusión es más correcta?",["La deuda desaparece al comenzar el siguiente trimestre.","Las cantidades deben identificarse y reclamarse por los cauces correspondientes; en caso de insolvencia pueden analizarse las garantías aplicables.","FOGASA pagará automáticamente las tres nóminas completas en cualquier supuesto.","La persona trabajadora pierde su derecho si continúa acudiendo al puesto."],1,"La deuda salarial debe documentarse y reclamarse. La posible cobertura de FOGASA dependerá del supuesto legal, el reconocimiento de la deuda y los límites aplicables.");
+add(5,"¿Qué aspecto diferencia una deuda salarial reconocida de una cantidad simplemente discutida?",["La deuda reconocida cuenta con una base de acreditación o reconocimiento que puede ser relevante para hacer efectivo el cobro.","La deuda discutida siempre se paga antes que la reconocida.","Ambas cantidades se abonan automáticamente por FOGASA sin comprobaciones.","La diferencia depende únicamente de si el salario se cobra en efectivo."],0,"La acreditación o reconocimiento de la deuda puede ser relevante para su reclamación y para acceder a los mecanismos de garantía.");
+add(5,"¿Cuál es una práctica adecuada al preparar una reclamación salarial?",["Reclamar una cifra aproximada sin detallar meses ni conceptos.","Separar cantidades por periodo y concepto, conservar las pruebas y comprobar los plazos correspondientes.","Incluir vacaciones futuras como si fueran nóminas impagadas ya vencidas.","Eliminar cualquier comunicación previa con la empresa."],1,"Un cálculo detallado, acompañado de documentación y realizado dentro de los plazos correspondientes, ayuda a fundamentar la reclamación.");
+add(5,"¿Qué afirmación sobre la protección del salario es correcta?",["Impide que una persona trabajadora tenga que probar cualquier deuda.","Garantiza el cobro ilimitado de todas las cantidades con independencia de las circunstancias.","Establece mecanismos específicos de preferencia y garantía, cuyo alcance depende de los requisitos legales.","Solo protege a las personas trabajadoras con contrato indefinido."],2,"La protección del salario existe mediante mecanismos concretos, pero su aplicación y alcance dependen de los presupuestos establecidos legalmente.");
+add(5,"¿Por qué es incorrecto afirmar que FOGASA sustituye por completo al empleador?",["Porque el organismo no existe en el sistema laboral español.","Porque su responsabilidad se limita a las obligaciones, conceptos, condiciones y cuantías cubiertos legalmente; el empleador mantiene sus obligaciones.","Porque solo interviene para calcular el salario base.","Porque la intervención solo se permite en empresas con menos de diez trabajadores."],1,"FOGASA no libera al empleador de toda responsabilidad ni cubre cualquier concepto sin límite: actúa dentro de un marco de garantías legales.");
+add(5,"¿Cuál es la mejor estrategia para resolver una pregunta sobre las garantías del salario?",["Aplicar la misma respuesta a cualquier supuesto de deuda empresarial.","Distinguir el tipo de crédito, el periodo reclamado, la situación de la empresa y el mecanismo legal de protección aplicable.","Considerar únicamente el salario neto de la última nómina.","Confundir el crédito salarial con el derecho a vacaciones."],1,"Las garantías se aplican atendiendo a varios factores: naturaleza y antigüedad del crédito, situación de la empresa y requisitos del mecanismo correspondiente.");
+
+const home = document.getElementById("home");
+const quiz = document.getElementById("quiz");
+const results = document.getElementById("results");
+const themeGrid = document.getElementById("themeGrid");
+const countSelect = document.getElementById("count");
+const orderSelect = document.getElementById("order");
+let selectedTopic = 0;
+let activeQuestions = [];
+let position = 0;
+let selectedAnswer = null;
+let answered = false;
+let right = 0;
+let wrong = 0;
+let answerLog = [];
+let previousSetup = {topic:0,count:30,order:"random"};
+
+function el(id){return document.getElementById(id)}
+function shuffle(arr){
+ const copy=arr.slice();
+ for(let i=copy.length-1;i>0;i--){
+  const j=Math.floor(Math.random()*(i+1));
+  [copy[i],copy[j]]=[copy[j],copy[i]];
+ }
+ return copy;
+}
+function renderThemes(){
+ themeGrid.innerHTML="";
+ const all={id:0,name:"Tema completo: todos los epígrafes",desc:"Cuestionario combinado con las 150 preguntas disponibles."};
+ [all,...topics].forEach(t=>{
+  const b=document.createElement("button");
+  b.type="button";
+  b.className="theme-card"+(selectedTopic===t.id?" selected":"");
+  b.setAttribute("aria-pressed",String(selectedTopic===t.id));
+  const num=document.createElement("span");
+  num.className="theme-num";
+  num.textContent=t.id===0?"★":String(t.id);
+  const text=document.createElement("span");
+  const name=document.createElement("span");
+  name.className="theme-name";
+  name.textContent=t.name;
+  const desc=document.createElement("span");
+  desc.className="theme-desc";
+  desc.textContent=t.desc;
+  text.append(name,desc);
+  b.append(num,text);
+  b.addEventListener("click",()=>{selectedTopic=t.id;renderThemes()});
+  themeGrid.appendChild(b);
+ });
+}
+function goHome(){
+ quiz.classList.add("hidden");
+ results.classList.add("hidden");
+ home.classList.remove("hidden");
+ renderThemes();
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+function startQuiz(){
+ const count=Number(countSelect.value);
+ let pool=selectedTopic===0?bank.slice():bank.filter(q=>q.t===selectedTopic);
+ if(orderSelect.value==="random")pool=shuffle(pool);
+ activeQuestions=pool.slice(0,Math.min(count,pool.length));
+ if(!activeQuestions.length){alert("No hay preguntas disponibles para esta selección.");return}
+ previousSetup={topic:selectedTopic,count,order:orderSelect.value};
+ position=0;right=0;wrong=0;answerLog=[];
+ home.classList.add("hidden");
+ results.classList.add("hidden");
+ quiz.classList.remove("hidden");
+ const theme=selectedTopic===0?"Tema completo":topics.find(t=>t.id===selectedTopic).name;
+ el("quizTitle").textContent=theme;
+ window.scrollTo({top:0,behavior:"smooth"});
+ renderQuestion();
+}
+function renderQuestion(){
+ selectedAnswer=null;
+ answered=false;
+ const q=activeQuestions[position];
+ el("progressText").textContent=`Pregunta ${position+1} de ${activeQuestions.length}`;
+ el("topicText").textContent=topics.find(t=>t.id===q.t).name.replace(/^\d+\.\s*/,"");
+ el("scoreText").textContent=`Aciertos: ${right}`;
+ const percent=Math.round(position/activeQuestions.length*100);
+ el("progressFill").style.width=percent+"%";
+ el("progressBar").setAttribute("aria-valuenow",String(percent));
+ el("questionText").textContent=q.q;
+ const opts=el("options");
+ opts.innerHTML="";
+ q.o.forEach((text,i)=>{
+  const b=document.createElement("button");
+  b.type="button";
+  b.className="option";
+  const letter=document.createElement("span");
+  letter.className="letter";
+  letter.textContent="ABCD"[i];
+  const body=document.createElement("span");
+  body.textContent=text;
+  b.append(letter,body);
+  b.addEventListener("click",()=>selectOption(i));
+  opts.appendChild(b);
+ });
+ el("feedback").className="feedback hidden";
+ el("feedback").innerHTML="";
+ el("check").disabled=true;
+ el("check").classList.remove("hidden");
+ el("next").classList.add("hidden");
+ el("next").textContent=position===activeQuestions.length-1?"Ver resultados":"Siguiente pregunta";
+}
+function selectOption(i){
+ if(answered)return;
+ selectedAnswer=i;
+ [...el("options").children].forEach((b,j)=>b.classList.toggle("selected",i===j));
+ el("check").disabled=false;
+}
+function checkAnswer(){
+ if(answered||selectedAnswer===null)return;
+ answered=true;
+ const q=activeQuestions[position];
+ const correct=selectedAnswer===q.a;
+ if(correct)right++;else wrong++;
+ answerLog.push({q,choice:selectedAnswer,correct});
+ [...el("options").children].forEach((b,i)=>{
+  b.disabled=true;
+  b.classList.remove("selected");
+  if(i===q.a)b.classList.add("correct");
+  if(i===selectedAnswer&&!correct)b.classList.add("wrong");
+ });
+ const feedback=el("feedback");
+ feedback.className="feedback "+(correct?"good":"bad");
+ const h=document.createElement("h3");
+ h.textContent=correct?"¡Respuesta correcta!":"Respuesta incorrecta";
+ const p=document.createElement("p");
+ p.textContent=(correct?"Bien hecho. ":"La respuesta correcta es "+"ABCD"[q.a]+". ")+q.e;
+ feedback.replaceChildren(h,p);
+ el("check").classList.add("hidden");
+ el("next").classList.remove("hidden");
+ el("scoreText").textContent=`Aciertos: ${right}`;
+ el("progressFill").style.width=Math.round((position+1)/activeQuestions.length*100)+"%";
+ el("progressBar").setAttribute("aria-valuenow",String(Math.round((position+1)/activeQuestions.length*100)));
+ el("next").focus();
+}
+function nextQuestion(){
+ if(!answered)return;
+ if(position<activeQuestions.length-1){
+  position++;
+  renderQuestion();
+  window.scrollTo({top:0,behavior:"smooth"});
+ }else showResults();
+}
+function showResults(){
+ quiz.classList.add("hidden");
+ results.classList.remove("hidden");
+ const total=activeQuestions.length;
+ const pct=Math.round(right/total*100);
+ el("resultTitle").textContent=pct>=90?"¡Dominio excelente!":pct>=70?"¡Buen trabajo!":"Sigue practicando: cada intento cuenta";
+ el("resultSubtitle").textContent=`Has completado ${total} preguntas de ${previousSetup.topic===0?"todos los epígrafes":topics.find(t=>t.id===previousSetup.topic).name}.`;
+ el("rightCount").textContent=right;
+ el("wrongCount").textContent=wrong;
+ el("percentage").textContent=pct+"%";
+ let message;
+ if(pct>=90)message="Has demostrado un dominio muy sólido de los contenidos. Revisa las preguntas falladas para confirmar los matices.";
+ else if(pct>=70)message="Tienes una buena base. Repasa las respuestas incorrectas y presta atención a los límites, excepciones y diferencias entre conceptos.";
+ else message="Este resultado señala qué contenidos conviene reforzar. Lee las explicaciones de cada pregunta y realiza otro intento para afianzar el aprendizaje.";
+ el("resultMessage").textContent=message;
+ const review=el("review");
+ review.innerHTML="";
+ answerLog.forEach((item,i)=>{
+  const d=document.createElement("details");
+  d.className="review-item";
+  const s=document.createElement("summary");
+  s.textContent=`${i+1}. ${item.correct?"✓":"✗"} ${item.q.q}`;
+  s.style.color=item.correct?"var(--green)":"var(--red)";
+  const p1=document.createElement("p");
+  p1.className="answerline";
+  p1.textContent="Tu respuesta: "+"ABCD"[item.choice]+". "+item.q.o[item.choice];
+  const p2=document.createElement("p");
+  p2.className="answerline";
+  p2.textContent="Respuesta correcta: "+"ABCD"[item.q.a]+". "+item.q.o[item.q.a];
+  p2.style.fontWeight="800";
+  p2.style.color="var(--green)";
+  const p3=document.createElement("p");
+  p3.className="answerline";
+  p3.textContent="Explicación: "+item.q.e;
+  d.append(s,p1,p2,p3);
+  review.appendChild(d);
+ });
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+function retryQuiz(){
+ selectedTopic=previousSetup.topic;
+ countSelect.value=String(previousSetup.count);
+ orderSelect.value=previousSetup.order;
+ startQuiz();
+}
+el("start").addEventListener("click",startQuiz);
+el("allTopics").addEventListener("click",()=>{
+ selectedTopic=0;
+ renderThemes();
+});
+el("homeFromQuiz").addEventListener("click",goHome);
+el("quit").addEventListener("click",goHome);
+el("check").addEventListener("click",checkAnswer);
+el("next").addEventListener("click",nextQuestion);
+el("restart").addEventListener("click",goHome);
+el("retry").addEventListener("click",retryQuiz);
+document.addEventListener("keydown",e=>{
+ if(quiz.classList.contains("hidden"))return;
+ if(!answered && ["1","2","3","4"].includes(e.key))selectOption(Number(e.key)-1);
+ if(e.key==="Enter"){
+  if(!answered&&selectedAnswer!==null)checkAnswer();
+  else if(answered)nextQuestion();
+ }
+});
+renderThemes();
+</script>
+</body>
+</html>
